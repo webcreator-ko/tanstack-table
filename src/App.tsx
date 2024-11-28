@@ -1,13 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./app.module.scss";
 import Pagination from "./components/pagination/pagination";
-import Checkbox from "./components/checkbox/checkbox";
+import { infoTable } from "./data/test";
+import ComplexTable from "./parts/complexTable";
+
+// どこの配列から表示するか
+const FIRST_PAGE_NATION_INDEX = 1;
+
+// 表示するアイテム数
+const DISPLAY_ITEM_INDEX = 10;
 
 function App() {
- const [currentPageIndex, setCurrentPageIndex] = useState(1);
- const handlePageChange = (i: number) => setCurrentPageIndex(i);
+ const [currentPageNationIndex, setCurrentPageNationIndex] = useState(
+  FIRST_PAGE_NATION_INDEX
+ );
+ const [endPageIndex, setEndPageIndex] = useState(DISPLAY_ITEM_INDEX);
+ const handlePageChange = (i: number) => setCurrentPageNationIndex(i);
+ const totalPages = infoTable.length / DISPLAY_ITEM_INDEX;
+ const startPageIndex = endPageIndex - DISPLAY_ITEM_INDEX;
 
- const totalPages = 100;
+ useEffect(() => {
+  const endPages = DISPLAY_ITEM_INDEX * currentPageNationIndex;
+  setEndPageIndex(endPages);
+ }, [currentPageNationIndex]);
 
  return (
   <div className={styles.wrap}>
@@ -31,108 +46,27 @@ function App() {
      </tr>
     </thead>
     <tbody>
-     <tr>
-      <td>9999999999</td>
-      <td>9999999999</td>
-      <td>山田 太郎</td>
-      <td>昭和30年11月4日</td>
-      <td>東京都千代田区1-2-3</td>
-      <td>対応完了</td>
-     </tr>
-     <tr>
-      <td>9999999999</td>
-      <td>9999999999</td>
-      <td>山田 太郎</td>
-      <td>昭和30年11月4日</td>
-      <td>東京都千代田区1-2-3</td>
-      <td>対応完了</td>
-     </tr>
-     <tr>
-      <td>9999999999</td>
-      <td>9999999999</td>
-      <td>山田 太郎</td>
-      <td>昭和30年11月4日</td>
-      <td>東京都千代田区1-2-3</td>
-      <td>対応完了</td>
-     </tr>
-     <tr>
-      <td>9999999999</td>
-      <td>9999999999</td>
-      <td>山田 太郎</td>
-      <td>昭和30年11月4日</td>
-      <td>東京都千代田区1-2-3</td>
-      <td>対応完了</td>
-     </tr>
+     {infoTable
+      // 先頭の配列indexは0の為、-1する
+      .slice(startPageIndex, endPageIndex)
+      .map((e) => (
+       <tr key={e.id}>
+        <td>{e.subscriberNumber}</td>
+        <td>{e.beneficiaryNumber}</td>
+        <td>{e.fullName}</td>
+        <td>{e.birthDate}</td>
+        <td>{e.address}</td>
+        <td>{e.status}</td>
+       </tr>
+      ))}
     </tbody>
    </table>
    <Pagination
-    currentPage={currentPageIndex}
+    currentPage={currentPageNationIndex}
     totalPages={totalPages}
     onPageChange={handlePageChange}
    />
-   <aside className={styles.aside}>
-    <h2>複雑なth</h2>
-    <table className={styles.asideTable}>
-     <thead>
-      {/* 1行目 */}
-      <tr>
-       <th rowSpan={3}>th1</th>
-       <th colSpan={2}>th2</th>
-       <th colSpan={2}>th6</th>
-       {/* ここの colSpan は最終的に子の列数はいくつになるか */}
-       <th colSpan={7}>th11</th>
-      </tr>
-      {/* 2行目 */}
-      <tr>
-       <th colSpan={2}>th3</th>
-       <th>th7</th>
-       <th>th8</th>
-       <th colSpan={3}>th12</th>
-       <th>th13</th>
-       <th colSpan={2}>th14</th>
-      </tr>
-      {/* 3行目 */}
-      <tr>
-       <th>th4</th>
-       <th>th5</th>
-       <th>th9</th>
-       <th>th10</th>
-       <th>th15</th>
-       <th>th16</th>
-       <th>th17</th>
-       <th>th18</th>
-       <th>th19</th>
-       <th>th20</th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td colSpan={11}>
-        <Checkbox id="row1" className={styles.checkbox}>
-         <span className={styles.number}>1</span>
-         <span className={styles.text}>20年以上60歳以上</span>
-        </Checkbox>
-       </td>
-      </tr>
-      <tr>
-       <td colSpan={11}>
-        <Checkbox id="row2" className={styles.checkbox}>
-         <span className={styles.number}>1</span>
-         <span className={styles.text}>加入者期間20年以上60歳未満</span>
-        </Checkbox>
-       </td>
-      </tr>
-      <tr>
-       <td colSpan={11}>
-        <Checkbox id="row3" className={styles.checkbox}>
-         <span className={styles.number}>1</span>
-         <span className={styles.text}>加入者期間20年以上60歳以上</span>
-        </Checkbox>
-       </td>
-      </tr>
-     </tbody>
-    </table>
-   </aside>
+   <ComplexTable />
   </div>
  );
 }

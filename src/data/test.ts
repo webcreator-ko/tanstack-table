@@ -8,7 +8,7 @@ type InfoTableType = {
  status: "未対応" | "対応中" | "対応完了";
 };
 
-const infoTableType: InfoTableType[] = [
+export const infoTable: InfoTableType[] = [
  {
   id: 1,
   subscriberNumber: 100,
