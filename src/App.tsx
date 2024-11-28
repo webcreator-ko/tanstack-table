@@ -46,19 +46,16 @@ function App() {
      </tr>
     </thead>
     <tbody>
-     {infoTable
-      // 先頭の配列indexは0の為、-1する
-      .slice(startPageIndex, endPageIndex)
-      .map((e) => (
-       <tr key={e.id}>
-        <td>{e.subscriberNumber}</td>
-        <td>{e.beneficiaryNumber}</td>
-        <td>{e.fullName}</td>
-        <td>{e.birthDate}</td>
-        <td>{e.address}</td>
-        <td>{e.status}</td>
-       </tr>
-      ))}
+     {infoTable.slice(startPageIndex, endPageIndex).map((e) => (
+      <tr key={e.id}>
+       <td>{e.subscriberNumber}</td>
+       <td>{e.beneficiaryNumber}</td>
+       <td>{e.fullName}</td>
+       <td>{e.birthDate}</td>
+       <td>{e.address}</td>
+       <td>{e.status}</td>
+      </tr>
+     ))}
     </tbody>
    </table>
    <Pagination
