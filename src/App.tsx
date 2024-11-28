@@ -41,7 +41,7 @@ function App() {
  return (
   <div className={styles.wrap}>
    <p>
-    全9,999件中
+    全{infoTable.length}件中
     <select onChange={onChangeItemDisplaySelect}>
      <option value="20">20</option>
      <option value="40">40</option>
