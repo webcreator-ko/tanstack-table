@@ -22,13 +22,18 @@ function App() {
  const startPageIndex = endPageIndex - displayItemIndex;
 
  useEffect(() => {
-  const endPages = displayItemIndex * currentPageNationIndex;
-  setEndPageIndex(endPages);
+  const endPageIndex = displayItemIndex * currentPageNationIndex;
+  setEndPageIndex(endPageIndex);
  }, [currentPageNationIndex, displayItemIndex]);
 
  const onChangeItemDisplaySelect = (
   e: React.ChangeEvent<HTMLSelectElement>
  ) => {
+  // ページネーションの位置を初期値にする
+  setCurrentPageNationIndex(FIRST_PAGE_NATION_INDEX);
+  setEndPageIndex(DISPLAY_ITEM_INDEX);
+
+  // 表示数を変更
   const index = Number(e.currentTarget.value);
   setDisplayItemIndex(index);
  };
