@@ -8,27 +8,36 @@ import ComplexTable from "./parts/complexTable";
 const FIRST_PAGE_NATION_INDEX = 1;
 
 // 表示するアイテム数
-const DISPLAY_ITEM_INDEX = 10;
+const DISPLAY_ITEM_INDEX = 20;
 
 function App() {
  const [currentPageNationIndex, setCurrentPageNationIndex] = useState(
   FIRST_PAGE_NATION_INDEX
  );
- const [endPageIndex, setEndPageIndex] = useState(DISPLAY_ITEM_INDEX);
+ const [displayItemIndex, setDisplayItemIndex] = useState(DISPLAY_ITEM_INDEX);
+ const [endPageIndex, setEndPageIndex] = useState(displayItemIndex);
  const handlePageChange = (i: number) => setCurrentPageNationIndex(i);
- const totalPages = infoTable.length / DISPLAY_ITEM_INDEX;
- const startPageIndex = endPageIndex - DISPLAY_ITEM_INDEX;
+ // 小数点は全て繰り上げ
+ const totalPages = Math.ceil(infoTable.length / displayItemIndex);
+ const startPageIndex = endPageIndex - displayItemIndex;
 
  useEffect(() => {
-  const endPages = DISPLAY_ITEM_INDEX * currentPageNationIndex;
+  const endPages = displayItemIndex * currentPageNationIndex;
   setEndPageIndex(endPages);
- }, [currentPageNationIndex]);
+ }, [currentPageNationIndex, displayItemIndex]);
+
+ const onChangeItemDisplaySelect = (
+  e: React.ChangeEvent<HTMLSelectElement>
+ ) => {
+  const index = Number(e.currentTarget.value);
+  setDisplayItemIndex(index);
+ };
 
  return (
   <div className={styles.wrap}>
    <p>
     全9,999件中
-    <select>
+    <select onChange={onChangeItemDisplaySelect}>
      <option value="20">20</option>
      <option value="40">40</option>
     </select>
