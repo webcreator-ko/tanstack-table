@@ -1,8 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./app.module.scss";
 import Pagination from "./components/pagination/pagination";
-import { infoTable } from "./data/test";
+import { infoTable, InfoTableType } from "./data/test";
 import ComplexTable from "./parts/complexTable";
+import {
+ ColumnDef,
+ flexRender,
+ getCoreRowModel,
+ getSortedRowModel,
+ SortingState,
+ useReactTable,
+} from "@tanstack/react-table";
 
 // どこの配列から表示するか
 const FIRST_PAGE_NATION_INDEX = 1;
@@ -38,6 +46,65 @@ function App() {
   setDisplayItemIndex(index);
  };
 
+ // tanstack table
+ const columns = useMemo<ColumnDef<InfoTableType>[]>(
+  () => [
+   {
+    accessorKey: "subscriberNumber",
+    header: () => "加入者番号",
+   },
+   {
+    accessorKey: "beneficiaryNumber",
+    header: () => "受給者番号",
+   },
+   {
+    accessorKey: "fullName",
+    header: () => "氏名",
+   },
+   {
+    accessorKey: "birthDate",
+    header: () => "生年月日",
+   },
+   {
+    accessorKey: "address",
+    header: () => "住所",
+   },
+   {
+    accessorKey: "status",
+    header: () => "ステータス",
+   },
+  ],
+  []
+ );
+
+ const [sorting, setSorting] = useState<SortingState>([]);
+
+ const table = useReactTable({
+  columns,
+  data: infoTable,
+  debugTable: true, // テーブルのデバッグモードを有効にする
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(), // クライアントサイドの並び替え
+  onSortingChange: setSorting, // 独自のスコープ内で並び替え状態を制御しやすくするためのオプション
+  //   onSortingChange: (updater) => {
+  //    // ソート状態を更新するだけでデータの並び替えは行わない
+  //    setSorting(typeof updater === "function" ? updater(sorting) : updater);
+  //   },
+  // sortingFns: {
+  //   sortStatusFn, // またはカスタム並び替え関数をグローバルに提供して、すべての列で使用可能にする
+  // },
+  // クライアントサイドのページネーションの場合、pageCount や rowCount を渡す必要はありません。自動的に計算されます。
+  state: {
+   sorting, // 並び替えの状態
+  },
+  // autoResetPageIndex: false, // 並び替えやフィルタリング時にページインデックスをリセットしないようにする - デフォルトはオン/true
+  // enableMultiSort: false, // Shiftキーを使用した複数列の並び替えを無効化 - デフォルトはオン/true
+  // enableSorting: false, // 並び替え機能を無効化 - デフォルトはオン/true
+  // enableSortingRemoval: false, // 並び替えの解除を許可しない - デフォルトはオン/true
+  // isMultiSortEvent: (e) => true, // すべてのクリックで複数列の並び替えを有効にする - デフォルトは Shiftキーが必要
+  // maxMultiSortColCount: 3, // 同時に並び替え可能な列数を3に制限する - デフォルトは無制限 (Infinity)
+ });
+
  return (
   <div className={styles.wrap}>
    <p>
@@ -50,26 +117,57 @@ function App() {
    </p>
    <table className={styles.table}>
     <thead>
-     <tr>
-      <th>加入者番号</th>
-      <th>受給者番号</th>
-      <th>氏名</th>
-      <th>生年月日</th>
-      <th>住所</th>
-      <th>ステータス</th>
-     </tr>
-    </thead>
-    <tbody>
-     {infoTable.slice(startPageIndex, endPageIndex).map((e) => (
-      <tr key={e.id}>
-       <td>{e.subscriberNumber}</td>
-       <td>{e.beneficiaryNumber}</td>
-       <td>{e.fullName}</td>
-       <td>{e.birthDate}</td>
-       <td>{e.address}</td>
-       <td>{e.status}</td>
+     {table.getHeaderGroups().map((headerGroup) => (
+      <tr key={headerGroup.id}>
+       {headerGroup.headers.map((header) => {
+        return (
+         <th key={header.id} colSpan={header.colSpan}>
+          {header.isPlaceholder ? null : (
+           <div
+            className={
+             header.column.getCanSort() ? "cursor-pointer select-none" : ""
+            }
+            onClick={header.column.getToggleSortingHandler()}
+            title={
+             header.column.getCanSort()
+              ? header.column.getNextSortingOrder() === "asc"
+                ? "Sort ascending"
+                : header.column.getNextSortingOrder() === "desc"
+                ? "Sort descending"
+                : "Clear sort"
+              : undefined
+            }
+           >
+            {flexRender(header.column.columnDef.header, header.getContext())}
+            {{
+             asc: " 🔼",
+             desc: " 🔽",
+            }[header.column.getIsSorted() as string] ?? null}
+           </div>
+          )}
+         </th>
+        );
+       })}
       </tr>
      ))}
+    </thead>
+    <tbody>
+     {table
+      .getRowModel()
+      .rows.slice(startPageIndex, endPageIndex)
+      .map((row) => {
+       return (
+        <tr key={row.id}>
+         {row.getVisibleCells().map((cell) => {
+          return (
+           <td key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+           </td>
+          );
+         })}
+        </tr>
+       );
+      })}
     </tbody>
    </table>
    <Pagination

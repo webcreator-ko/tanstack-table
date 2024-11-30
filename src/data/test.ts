@@ -1,4 +1,4 @@
-type InfoTableType = {
+export type InfoTableType = {
  id: number;
  subscriberNumber: number;
  beneficiaryNumber: number;
