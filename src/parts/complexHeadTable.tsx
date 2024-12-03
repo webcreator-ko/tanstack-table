@@ -1,11 +1,11 @@
 import Checkbox from "../components/checkbox/checkbox";
-import complexTableStyles from "./complex-table.module.scss";
+import styles from "./complex-head-table.module.scss";
 
-const ComplexTable = () => {
+const ComplexHeadTable = () => {
  return (
-  <aside className={complexTableStyles.wrap}>
+  <aside className={styles.wrap}>
    <h2>複雑なth</h2>
-   <table className={complexTableStyles.asideTable}>
+   <table className={styles.asideTable}>
     <thead>
      {/* 1行目 */}
      <tr>
@@ -41,29 +41,25 @@ const ComplexTable = () => {
     <tbody>
      <tr>
       <td colSpan={11}>
-       <Checkbox id="row1" className={complexTableStyles.checkbox}>
-        <span className={complexTableStyles.number}>1</span>
-        <span className={complexTableStyles.text}>20年以上60歳以上</span>
+       <Checkbox id="row1" className={styles.checkbox}>
+        <span className={styles.number}>1</span>
+        <span className={styles.text}>20年以上60歳以上</span>
        </Checkbox>
       </td>
      </tr>
      <tr>
       <td colSpan={11}>
-       <Checkbox id="row2" className={complexTableStyles.checkbox}>
-        <span className={complexTableStyles.number}>1</span>
-        <span className={complexTableStyles.text}>
-         加入者期間20年以上60歳未満
-        </span>
+       <Checkbox id="row2" className={styles.checkbox}>
+        <span className={styles.number}>1</span>
+        <span className={styles.text}>加入者期間20年以上60歳未満</span>
        </Checkbox>
       </td>
      </tr>
      <tr>
       <td colSpan={11}>
-       <Checkbox id="row3" className={complexTableStyles.checkbox}>
-        <span className={complexTableStyles.number}>1</span>
-        <span className={complexTableStyles.text}>
-         加入者期間20年以上60歳以上
-        </span>
+       <Checkbox id="row3" className={styles.checkbox}>
+        <span className={styles.number}>1</span>
+        <span className={styles.text}>加入者期間20年以上60歳以上</span>
        </Checkbox>
       </td>
      </tr>
@@ -73,4 +69,4 @@ const ComplexTable = () => {
  );
 };
 
-export default ComplexTable;
+export default ComplexHeadTable;
