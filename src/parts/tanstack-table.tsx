@@ -45,7 +45,6 @@ const TanstackTable = () => {
   setDisplayItemIndex(index);
  };
 
- // tanstack table
  const columns = useMemo<ColumnDef<InfoTableType>[]>(
   () => [
    {
