@@ -65,7 +65,7 @@ const TanstackTableTwoSort = () => {
     accessorKey: "beneficiaryNumber",
     header: () => "受給者番号",
     // 文字列に変換しないとソートがばくる
-    accessorFn: (row) => row.subscriberNumber.toString(),
+    accessorFn: (row) => row.beneficiaryNumber.toString(),
    },
    {
     accessorKey: "fullName",
