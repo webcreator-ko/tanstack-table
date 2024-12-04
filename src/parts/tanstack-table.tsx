@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import styles from "./tanstack-table.module.scss";
 import { infoTable, InfoTableType } from "../data/test";
 import {
@@ -23,25 +23,25 @@ const TanstackTable = () => {
  );
  const [displayItemIndex, setDisplayItemIndex] = useState(DISPLAY_ITEM_INDEX);
  const [endPageIndex, setEndPageIndex] = useState(displayItemIndex);
- const handlePageChange = (i: number) => setCurrentPageNationIndex(i);
+ const handlePageChange = (i: number) => {
+  const endPageIndex = displayItemIndex * i;
+  setEndPageIndex(endPageIndex);
+  setCurrentPageNationIndex(i);
+ };
+
  // 小数点は全て繰り上げ
  const totalPages = Math.ceil(infoTable.length / displayItemIndex);
  const startPageIndex = endPageIndex - displayItemIndex;
-
- useEffect(() => {
-  const endPageIndex = displayItemIndex * currentPageNationIndex;
-  setEndPageIndex(endPageIndex);
- }, [currentPageNationIndex, displayItemIndex]);
 
  const onChangeItemDisplaySelect = (
   e: React.ChangeEvent<HTMLSelectElement>
  ) => {
   // ページネーションの位置を初期値にする
   setCurrentPageNationIndex(FIRST_PAGE_NATION_INDEX);
-  setEndPageIndex(DISPLAY_ITEM_INDEX);
 
   // 表示数を変更
   const index = Number(e.currentTarget.value);
+  setEndPageIndex(index);
   setDisplayItemIndex(index);
  };
 
