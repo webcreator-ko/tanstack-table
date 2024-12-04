@@ -157,6 +157,23 @@ const TanstackTable = () => {
        return (
         <tr key={row.id}>
          {row.getVisibleCells().map((cell) => {
+          // getValueでも取得可能
+          //     const id =
+          //     cell.column.id
+          // const cellValue =
+          //     cell.getValue() as string
+
+          // 重要なポイント
+          // cell.getValue() を使う
+          // cell.getValue() は、指定したセルに紐付けられた実際のデータを返します。
+          // これにより、flexRender を使用する必要がなくなります。
+
+          // flexRender を使う場合
+          // flexRender は、カスタムセルのレンダリングに必要です。ただし、単純なデータを取得する場合には不要です。
+          // cell.getValue() と組み合わせることで、レンダリング前の値も取得できます。
+
+          // もしカスタムセルが flexRender を使用しており、そこに値が埋め込まれている場合は以下のようにデバッグして値を探すことができます。
+          // console.log(cell.getContext());
           return (
            <td key={cell.id}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
