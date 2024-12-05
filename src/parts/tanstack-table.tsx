@@ -76,6 +76,11 @@ const TanstackTable = () => {
   []
  );
 
+ //  const [columnPinning] = useState({
+ //   // 右固定
+ //   right: ["status"],
+ //  });
+
  const [sorting, setSorting] = useState<SortingState>([]);
 
  const table = useReactTable({
@@ -95,6 +100,21 @@ const TanstackTable = () => {
   // クライアントサイドのページネーションの場合、pageCount や rowCount を渡す必要はありません。自動的に計算されます。
   state: {
    sorting, // 並び替えの状態
+
+   // 下記方法で特定のカラムを非表示にできる
+   // カラム非表示の為
+   //   columnVisibility: {
+   //     basicPensionNumber: false,
+   // },
+
+   // 下記方法で特定のカラム固定が出来る
+   // columnPinning,
+
+   // 検索の為
+   //   columnFilters: tableState.columnFilters,
+
+   // チェックボックスの為
+   //  rowSelection: tableState.rowSelection,
   },
   // autoResetPageIndex: false, // 並び替えやフィルタリング時にページインデックスをリセットしないようにする - デフォルトはオン/true
   // enableMultiSort: false, // Shiftキーを使用した複数列の並び替えを無効化 - デフォルトはオン/true
