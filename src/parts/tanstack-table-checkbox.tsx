@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import styles from "./tanstack-table-checkbox.module.scss";
 import { infoTable, InfoTableType } from "../data/test";
 import {
@@ -18,6 +18,10 @@ const FIRST_PAGE_NATION_INDEX = 1;
 // 表示するアイテム数
 const DISPLAY_ITEM_INDEX = 20;
 
+/**
+ * 参考にしたサンプルコード
+ * https://tanstack.com/table/latest/docs/framework/react/examples/expanding
+ */
 const TanstackTableCheckbox = () => {
  const [currentPageNationIndex, setCurrentPageNationIndex] = useState(
   FIRST_PAGE_NATION_INDEX
@@ -109,6 +113,71 @@ const TanstackTableCheckbox = () => {
   // maxMultiSortColCount: 3, // 同時に並び替え可能な列数を3に制限する - デフォルトは無制限 (Infinity)
  });
 
+ // この ref を使用してないけど、使用サンプルとして残しとく
+ //  const refs = useRef<RefObject<HTMLInputElement>[]>([]);
+
+ //  const onClickInputElement = (index: number) => {
+ //   console.log(index);
+ //   console.log(refs.current[index].current?.checked);
+ //   if (!refs.current[index].current) return;
+ //   const isChecked = refs.current[index].current?.checked;
+ //   refs.current[index].current.checked = !isChecked;
+ //  };
+
+ // チェックボックスの切り替え
+ const toggleRowSelection = (rowId: string, isSelected: boolean) => {
+  table.setRowSelection((prev) => ({
+   ...prev,
+   [rowId]: !isSelected,
+  }));
+ };
+
+ // すべての行を選択または選択解除する関数
+ const isCheckboxRef = useRef<boolean>(false);
+ const toggleAllRowsSelection = () => {
+  const newSelection: Record<string, boolean> = {};
+  if (!isCheckboxRef.current) {
+   // 表示している行
+   table
+    .getRowModel()
+    .rows.slice(startPageIndex, endPageIndex)
+    .forEach((row) => {
+     newSelection[row.id] = true; // 表示されている行を選択
+    });
+
+   // 全ての行
+   //  table.getCoreRowModel().rows.forEach((row) => {
+   //   newSelection[row.id] = true;
+   //  });
+
+   isCheckboxRef.current = true;
+  } else {
+   // 表示している行
+   table
+    .getRowModel()
+    .rows.slice(startPageIndex, endPageIndex)
+    .forEach((row) => {
+     newSelection[row.id] = false;
+    });
+
+   // 全ての行
+   //  table.getCoreRowModel().rows.forEach((row) => {
+   //   newSelection[row.id] = false;
+   //  });
+
+   isCheckboxRef.current = false;
+  }
+  table.setRowSelection(newSelection);
+ };
+
+ // 現在選択されている行のIDを取得
+ const getSelectedCheckboxIds = () => {
+  const selectedRowIds = Object.keys(table.getState().rowSelection).filter(
+   (rowId) => table.getState().rowSelection[rowId] === true
+  );
+  console.log("選択された行のID:", selectedRowIds);
+ };
+
  return (
   <>
    <h2 className={styles.title}>チェックボックス機能</h2>
@@ -123,10 +192,14 @@ const TanstackTableCheckbox = () => {
     </div>
     <ul className={styles.button}>
      <li>
-      <button type="button">全選択</button>
+      <button type="button" onClick={toggleAllRowsSelection}>
+       全選択
+      </button>
      </li>
      <li>
-      <button type="button">選択したチェックボックス</button>
+      <button type="button" onClick={getSelectedCheckboxIds}>
+       選択したチェックボックス
+      </button>
      </li>
     </ul>
    </aside>
@@ -172,7 +245,10 @@ const TanstackTableCheckbox = () => {
       .rows.slice(startPageIndex, endPageIndex)
       .map((row) => {
        return (
-        <tr key={row.id}>
+        <tr
+         key={row.id}
+         onClick={() => toggleRowSelection(row.id, row.getIsSelected())}
+        >
          {row.getVisibleCells().map((cell, i) => {
           // getValueでも取得可能
           //     const id =
@@ -193,9 +269,16 @@ const TanstackTableCheckbox = () => {
           // console.log(cell.getContext());
 
           if (cell.id.includes("checkbox")) {
+           //  refs.current[r] = createRef<HTMLInputElement>();
+
            return (
             <td key={cell.id}>
-             <Checkbox id={i.toString()} />
+             <Checkbox
+              // ref={refs.current[r]}
+              id={i.toString()}
+              isChecked={row.getIsSelected()}
+              onChange={row.getToggleSelectedHandler()}
+             />
             </td>
            );
           } else {

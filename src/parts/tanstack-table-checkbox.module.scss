@@ -109,6 +109,14 @@
                     }
                 }
             }
+
+            &:hover { 
+                cursor: pointer;
+        
+                 td {
+                    background: lightblue;
+                }
+            }
         }
     }
 }
