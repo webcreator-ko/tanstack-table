@@ -23,7 +23,7 @@ const DISPLAY_ITEM_INDEX = 20;
  * https://tanstack.com/table/latest/docs/framework/react/examples/expanding
  */
 const TanstackTableCheckbox = () => {
- const [currentPageNationIndex, setCurrentPageNationIndex] = useState(
+ const [currentPagiNationIndex, setCurrentPagiNationIndex] = useState(
   FIRST_PAGE_NATION_INDEX
  );
  const [displayItemIndex, setDisplayItemIndex] = useState(DISPLAY_ITEM_INDEX);
@@ -31,18 +31,14 @@ const TanstackTableCheckbox = () => {
  const handlePageChange = (i: number) => {
   const endPageIndex = displayItemIndex * i;
   setEndPageIndex(endPageIndex);
-  setCurrentPageNationIndex(i);
+  setCurrentPagiNationIndex(i);
  };
-
- // 小数点は全て繰り上げ
- const totalPages = Math.ceil(infoTable.length / displayItemIndex);
- const startPageIndex = endPageIndex - displayItemIndex;
 
  const onChangeItemDisplaySelect = (
   e: React.ChangeEvent<HTMLSelectElement>
  ) => {
   // ページネーションの位置を初期値にする
-  setCurrentPageNationIndex(FIRST_PAGE_NATION_INDEX);
+  setCurrentPagiNationIndex(FIRST_PAGE_NATION_INDEX);
 
   // 表示数を変更
   const index = Number(e.currentTarget.value);
@@ -59,10 +55,14 @@ const TanstackTableCheckbox = () => {
    {
     accessorKey: "subscriberNumber",
     header: () => "加入者番号",
+    // 文字列に変換しないとソートと検索がバグる
+    accessorFn: (row) => row.subscriberNumber.toString(),
    },
    {
     accessorKey: "beneficiaryNumber",
     header: () => "受給者番号",
+    // 文字列に変換しないとソートと検索がバグる
+    accessorFn: (row) => row.beneficiaryNumber.toString(),
    },
    {
     accessorKey: "fullName",
@@ -81,7 +81,7 @@ const TanstackTableCheckbox = () => {
     header: () => "ステータス",
    },
   ],
-  // テーブルを切り替えて表示する場合は、その切り替える変数を入れないとテーブルが切り替わらないので注意する
+
   []
  );
 
@@ -131,6 +131,12 @@ const TanstackTableCheckbox = () => {
    [rowId]: !isSelected,
   }));
  };
+
+ // 小数点は全て繰り上げ
+ const totalPages = Math.ceil(
+  table.getRowModel().rows.length / displayItemIndex
+ );
+ const startPageIndex = endPageIndex - displayItemIndex;
 
  // すべての行を選択または選択解除する関数
  const isCheckboxRef = useRef<boolean>(false);
@@ -295,7 +301,7 @@ const TanstackTableCheckbox = () => {
     </tbody>
    </table>
    <Pagination
-    currentPage={currentPageNationIndex}
+    currentPage={currentPagiNationIndex}
     totalPages={totalPages}
     onPageChange={handlePageChange}
    />

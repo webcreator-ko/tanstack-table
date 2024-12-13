@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import styles from "./tanstack-table-filter.module.scss";
 import { infoTable, InfoTableType } from "../data/test";
 import {
  ColumnDef,
+ FilterFn,
  flexRender,
  getCoreRowModel,
+ getFilteredRowModel,
  getSortedRowModel,
  SortingState,
  useReactTable,
@@ -22,7 +24,7 @@ const DISPLAY_ITEM_INDEX = 20;
  * https://tanstack.com/table/latest/docs/framework/react/examples/expanding
  */
 const TanstackTableFilter = () => {
- const [currentPageNationIndex, setCurrentPageNationIndex] = useState(
+ const [currentPagiNationIndex, setCurrentPagiNationIndex] = useState(
   FIRST_PAGE_NATION_INDEX
  );
  const [displayItemIndex, setDisplayItemIndex] = useState(DISPLAY_ITEM_INDEX);
@@ -30,18 +32,24 @@ const TanstackTableFilter = () => {
  const handlePageChange = (i: number) => {
   const endPageIndex = displayItemIndex * i;
   setEndPageIndex(endPageIndex);
-  setCurrentPageNationIndex(i);
+  setCurrentPagiNationIndex(i);
  };
 
- // 小数点は全て繰り上げ
- const totalPages = Math.ceil(infoTable.length / displayItemIndex);
- const startPageIndex = endPageIndex - displayItemIndex;
+ // 検索の実装
+ const filterInputRef = useRef<HTMLInputElement>(null);
+ const globalFilterRef = useRef<HTMLInputElement>(null);
+ const [selectedColumn, setSelectedColumn] = useState("subscriberNumber"); // 部分検索用
+
+ const handlePagiNationReset = () => {
+  setCurrentPagiNationIndex(FIRST_PAGE_NATION_INDEX);
+  setEndPageIndex(displayItemIndex);
+ };
 
  const onChangeItemDisplaySelect = (
   e: React.ChangeEvent<HTMLSelectElement>
  ) => {
   // ページネーションの位置を初期値にする
-  setCurrentPageNationIndex(FIRST_PAGE_NATION_INDEX);
+  setCurrentPagiNationIndex(FIRST_PAGE_NATION_INDEX);
 
   // 表示数を変更
   const index = Number(e.currentTarget.value);
@@ -54,10 +62,20 @@ const TanstackTableFilter = () => {
    {
     accessorKey: "subscriberNumber",
     header: () => "加入者番号",
+    // 文字列に変換しないとソートと検索がバグる
+    accessorFn: (row) => row.subscriberNumber.toString(),
+    filterFn: (row, columnId, filterValue) => {
+     return row.getValue(columnId) === filterValue; // 完全一致
+    },
    },
    {
     accessorKey: "beneficiaryNumber",
     header: () => "受給者番号",
+    // 文字列に変換しないとソートと検索がバグる
+    accessorFn: (row) => row.beneficiaryNumber.toString(),
+    filterFn: (row, columnId, filterValue) => {
+     return row.getValue(columnId) === filterValue; // 完全一致
+    },
    },
    {
     accessorKey: "fullName",
@@ -76,11 +94,23 @@ const TanstackTableFilter = () => {
     header: () => "ステータス",
    },
   ],
-  // テーブルを切り替えて表示する場合は、その切り替える変数を入れないとテーブルが切り替わらないので注意する
+
   []
  );
 
  const [sorting, setSorting] = useState<SortingState>([]);
+
+ // 完全一致フィルタの型を定義
+ const exactMatchFilter: FilterFn<InfoTableType> = (
+  row,
+  columnId,
+  filterValue
+ ) => {
+  const cellValue = row.getValue(columnId);
+  return cellValue === filterValue; // 完全一致チェック
+ };
+
+ const [globalFilter, setGlobalFilter] = useState(""); // フィルタ値を管理
 
  const table = useReactTable({
   columns,
@@ -88,32 +118,27 @@ const TanstackTableFilter = () => {
   debugTable: true, // テーブルのデバッグモードを有効にする
   getCoreRowModel: getCoreRowModel(),
   getSortedRowModel: getSortedRowModel(), // クライアントサイドの並び替え
+  getFilteredRowModel: getFilteredRowModel(), // フィルタリングを有効化
   onSortingChange: setSorting, // 独自のスコープ内で並び替え状態を制御しやすくするためのオプション
-  //   onSortingChange: (updater) => {
-  //    // ソート状態を更新するだけでデータの並び替えは行わない
-  //    setSorting(typeof updater === "function" ? updater(sorting) : updater);
-  //   },
-  // sortingFns: {
-  //   sortStatusFn, // またはカスタム並び替え関数をグローバルに提供して、すべての列で使用可能にする
-  // },
-  // クライアントサイドのページネーションの場合、pageCount や rowCount を渡す必要はありません。自動的に計算されます。
   state: {
    sorting, // 並び替えの状態
+   globalFilter: globalFilter, // グローバルフィルタの初期値
   },
-  // autoResetPageIndex: false, // 並び替えやフィルタリング時にページインデックスをリセットしないようにする - デフォルトはオン/true
-  // enableMultiSort: false, // Shiftキーを使用した複数列の並び替えを無効化 - デフォルトはオン/true
-  // enableSorting: false, // 並び替え機能を無効化 - デフォルトはオン/true
-  // enableSortingRemoval: false, // 並び替えの解除を許可しない - デフォルトはオン/true
-  // isMultiSortEvent: (e) => true, // すべてのクリックで複数列の並び替えを有効にする - デフォルトは Shiftキーが必要
-  // maxMultiSortColCount: 3, // 同時に並び替え可能な列数を3に制限する - デフォルトは無制限 (Infinity)
+  globalFilterFn: exactMatchFilter, // 完全一致フィルタを適用
  });
+
+ // 小数点は全て繰り上げ
+ const totalPages = Math.ceil(
+  table.getFilteredRowModel().rows.length / displayItemIndex
+ );
+ const startPageIndex = endPageIndex - displayItemIndex;
 
  return (
   <>
    <h2 className={styles.title}>検索機能</h2>
    <aside className={styles.aside}>
     <div className={styles.displayIndex}>
-     全{infoTable.length}件中
+     全{table.getFilteredRowModel().rows.length}件中
      <select onChange={onChangeItemDisplaySelect}>
       <option value="20">20</option>
       <option value="40">40</option>
@@ -123,8 +148,11 @@ const TanstackTableFilter = () => {
     <ul className={styles.searchWrap}>
      <li>
       <span>部分検索</span>
-      <input type="text" />
-      <select id="">
+      <input type="text" ref={filterInputRef} />
+      <select
+       value={selectedColumn}
+       onChange={(e) => setSelectedColumn(e.target.value)}
+      >
        {table.getAllColumns().map((column) => {
         return (
          <option key={column.id} value={column.id}>
@@ -133,12 +161,36 @@ const TanstackTableFilter = () => {
         );
        })}
       </select>
-      <button>検索</button>
+      <button
+       onClick={() => {
+        //ページネーションリセット
+        handlePagiNationReset();
+
+        const val = filterInputRef.current?.value;
+        // table.setGlobalFilter([]);
+        setGlobalFilter("");
+        table.setColumnFilters([{ id: selectedColumn, value: val }]);
+       }}
+      >
+       検索
+      </button>
      </li>
      <li>
       <span>全検索</span>
-      <input type="text" />
-      <button>検索</button>
+      <input type="text" ref={globalFilterRef} />
+      <button
+       onClick={() => {
+        //ページネーションリセット
+        handlePagiNationReset();
+
+        const val = globalFilterRef.current?.value;
+        table.setColumnFilters([]);
+        // table.setGlobalFilter(val);
+        setGlobalFilter(val ?? "");
+       }}
+      >
+       検索
+      </button>
      </li>
     </ul>
    </aside>
@@ -180,46 +232,26 @@ const TanstackTableFilter = () => {
     </thead>
     <tbody>
      {table
-      .getRowModel()
-      .rows.slice(startPageIndex, endPageIndex)
-      .map((row) => {
-       return (
-        <tr key={row.id}>
-         {row.getVisibleCells().map((cell) => {
-          // getValueでも取得可能
-          //     const id =
-          //     cell.column.id
-          // const cellValue =
-          //     cell.getValue() as string
-
-          // 重要なポイント
-          // cell.getValue() を使う
-          // cell.getValue() は、指定したセルに紐付けられた実際のデータを返します。
-          // これにより、flexRender を使用する必要がなくなります。
-
-          // flexRender を使う場合
-          // flexRender は、カスタムセルのレンダリングに必要です。ただし、単純なデータを取得する場合には不要です。
-          // cell.getValue() と組み合わせることで、レンダリング前の値も取得できます。
-
-          // もしカスタムセルが flexRender を使用しており、そこに値が埋め込まれている場合は以下のようにデバッグして値を探すことができます。
-          // console.log(cell.getContext());
-
-          return (
-           <td key={cell.id}>
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-           </td>
-          );
-         })}
-        </tr>
-       );
-      })}
+      .getFilteredRowModel()
+      .rows.slice(startPageIndex, endPageIndex) // フィルタリング後のデータにページネーションを適用
+      .map((row) => (
+       <tr key={row.id}>
+        {row.getVisibleCells().map((cell) => (
+         <td key={cell.id}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+         </td>
+        ))}
+       </tr>
+      ))}
     </tbody>
    </table>
-   <Pagination
-    currentPage={currentPageNationIndex}
-    totalPages={totalPages}
-    onPageChange={handlePageChange}
-   />
+   {totalPages > 1 && (
+    <Pagination
+     currentPage={currentPagiNationIndex}
+     totalPages={totalPages}
+     onPageChange={handlePageChange}
+    />
+   )}
   </>
  );
 };

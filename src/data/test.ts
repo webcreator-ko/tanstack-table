@@ -31,7 +31,7 @@ export const infoTable: InfoTableType[] = [
   id: 3,
   subscriberNumber: 100,
   beneficiaryNumber: 11,
-  fullName: "山田太郎",
+  fullName: "前田太郎",
   birthDate: "昭和2年11月30日",
   address: "東京都千代田区1-2-3",
   status: "未対応",

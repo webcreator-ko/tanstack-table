@@ -18,7 +18,7 @@ const FIRST_PAGE_NATION_INDEX = 1;
 const DISPLAY_ITEM_INDEX = 20;
 
 const TanstackTableTwoSort = () => {
- const [currentPageNationIndex, setCurrentPageNationIndex] = useState(
+ const [currentPagiNationIndex, setCurrentPagiNationIndex] = useState(
   FIRST_PAGE_NATION_INDEX
  );
  const [displayItemIndex, setDisplayItemIndex] = useState(DISPLAY_ITEM_INDEX);
@@ -26,18 +26,14 @@ const TanstackTableTwoSort = () => {
  const handlePageChange = (i: number) => {
   const endPageIndex = displayItemIndex * i;
   setEndPageIndex(endPageIndex);
-  setCurrentPageNationIndex(i);
+  setCurrentPagiNationIndex(i);
  };
-
- // 小数点は全て繰り上げ
- const totalPages = Math.ceil(infoTable.length / displayItemIndex);
- const startPageIndex = endPageIndex - displayItemIndex;
 
  const onChangeItemDisplaySelect = (
   e: React.ChangeEvent<HTMLSelectElement>
  ) => {
   // ページネーションの位置を初期値にする
-  setCurrentPageNationIndex(FIRST_PAGE_NATION_INDEX);
+  setCurrentPagiNationIndex(FIRST_PAGE_NATION_INDEX);
 
   // 表示数を変更
   const index = Number(e.currentTarget.value);
@@ -58,13 +54,13 @@ const TanstackTableTwoSort = () => {
    {
     accessorKey: "subscriberNumber",
     header: () => "加入者番号",
-    // 文字列に変換しないとソートがばくる
+    // 文字列に変換しないとソートと検索がバグる
     accessorFn: (row) => row.subscriberNumber.toString(),
    },
    {
     accessorKey: "beneficiaryNumber",
     header: () => "受給者番号",
-    // 文字列に変換しないとソートがばくる
+    // 文字列に変換しないとソートと検索がバグる
     accessorFn: (row) => row.beneficiaryNumber.toString(),
    },
    {
@@ -84,7 +80,7 @@ const TanstackTableTwoSort = () => {
     header: () => "ステータス",
    },
   ],
-  // テーブルを切り替えて表示する場合は、その切り替える変数を入れないとテーブルが切り替わらないので注意する
+
   []
  );
 
@@ -210,6 +206,12 @@ const TanstackTableTwoSort = () => {
   maxMultiSortColCount: 2,
  });
 
+ // 小数点は全て繰り上げ
+ const totalPages = Math.ceil(
+  table.getRowModel().rows.length / displayItemIndex
+ );
+ const startPageIndex = endPageIndex - displayItemIndex;
+
  return (
   <>
    <h2 className={styles.title}>2カラムだけソート可能にする</h2>
@@ -277,7 +279,7 @@ const TanstackTableTwoSort = () => {
     </tbody>
    </table>
    <Pagination
-    currentPage={currentPageNationIndex}
+    currentPage={currentPagiNationIndex}
     totalPages={totalPages}
     onPageChange={handlePageChange}
    />
